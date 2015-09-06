@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SecureTraySample</string>
+    <string name="action_settings">Quit</string>
+</resources>
