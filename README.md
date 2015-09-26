@@ -1,4 +1,4 @@
-# SecuredTray v0.1.0
+# SecuredTray v0.1.1
 
 http://github.com/draekko/securedtray
 
