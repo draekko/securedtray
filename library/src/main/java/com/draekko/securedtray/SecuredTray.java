@@ -23,7 +23,7 @@
  * data may still be susceptible to attacks, especially on rooted devices.
  */
 
-package com.draekko.library;
+package com.draekko.securedtray;
 
 import android.content.Context;
 import android.os.Build;
@@ -33,11 +33,9 @@ import android.util.Base64;
 
 import com.tozny.crypto.android.AesCbcWithIntegrity;
 
-import net.grandcentrix.tray.TrayModulePreferences;
-import net.grandcentrix.tray.migration.Migration;
-import net.grandcentrix.tray.provider.TrayItem;
-import net.grandcentrix.tray.storage.ModularizedStorage;
-import net.grandcentrix.tray.storage.PreferenceStorage;
+import net.grandcentrix.tray.TrayPreferences;
+import net.grandcentrix.tray.core.Migration;
+import net.grandcentrix.tray.core.TrayItem;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -72,7 +70,7 @@ public class SecuredTray {
 
     private static Context context;
     private AesCbcWithIntegrity.SecretKeys secretKeys;
-    private TrayModulePreferences trayModulePreferences;
+    private TrayPreferences trayPreferences;
     private SecuredTray securedTray;
     private static List<ISecuredTrayListener> listeners;
 
@@ -91,35 +89,35 @@ public class SecuredTray {
     /**
      * SecuredTray constructor
      * @param context
-     * @param allTrayModulePreferences
+     * @param allTrayPreferences
      */
     public SecuredTray(Context context,
-                       final TrayModulePreferences allTrayModulePreferences) {
-        this(context, null, allTrayModulePreferences, null, null, 1);
+                       final TrayPreferences allTrayPreferences) {
+        this(context, null, allTrayPreferences, null, null, 1);
     }
 
     /**
      * SecuredTray constructor
      * @param context
      * @param secretKey
-     * @param allTrayModulePreferences
+     * @param allTrayPreferences
      */
     public SecuredTray(Context context,
                        final AesCbcWithIntegrity.SecretKeys secretKey,
-                       final TrayModulePreferences allTrayModulePreferences) {
-        this(context, secretKey, allTrayModulePreferences, null, null, 1);
+                       final TrayPreferences allTrayPreferences) {
+        this(context, secretKey, allTrayPreferences, null, null, 1);
     }
 
     /**
      * SecuredTray constructor
      * @param context
-     * @param allTrayModulePreferences
+     * @param allTrayPreferences
      * @param password
      */
     public SecuredTray(Context context,
-                       final TrayModulePreferences allTrayModulePreferences,
+                       final TrayPreferences allTrayPreferences,
                        final String password) {
-        this(context, null, allTrayModulePreferences, null, password, 1);
+        this(context, null, allTrayPreferences, null, password, 1);
     }
 
 
@@ -169,41 +167,41 @@ public class SecuredTray {
     /**
      * SecuredTray constructor
      * @param context
-     * @param allTrayModulePreferences
+     * @param allTrayPreferences
      * @param version
      */
     public SecuredTray(Context context,
-                       final TrayModulePreferences allTrayModulePreferences,
+                       final TrayPreferences allTrayPreferences,
                        final int version) {
-        this(context, null, allTrayModulePreferences, null, null, version);
+        this(context, null, allTrayPreferences, null, null, version);
     }
 
     /**
      * SecuredTray constructor
      * @param context
      * @param secretKey
-     * @param allTrayModulePreferences
+     * @param allTrayPreferences
      * @param version
      */
     public SecuredTray(Context context,
                        final AesCbcWithIntegrity.SecretKeys secretKey,
-                       final TrayModulePreferences allTrayModulePreferences,
+                       final TrayPreferences allTrayPreferences,
                        final int version) {
-        this(context, secretKey, allTrayModulePreferences, null, null, version);
+        this(context, secretKey, allTrayPreferences, null, null, version);
     }
 
     /**
      * SecuredTray constructor
      * @param context
-     * @param allTrayModulePreferences
+     * @param allTrayPreferences
      * @param password
      * @param version
      */
     public SecuredTray(Context context,
-                       final TrayModulePreferences allTrayModulePreferences,
+                       final TrayPreferences allTrayPreferences,
                        final String password,
                        final int version) {
-        this(context, null, allTrayModulePreferences, null, password, version);
+        this(context, null, allTrayPreferences, null, password, version);
     }
 
 
@@ -253,14 +251,14 @@ public class SecuredTray {
      * SecuredTray private constructor
      * @param local_context
      * @param secretKey
-     * @param allTrayModulePreferences
+     * @param allTrayPreferences
      * @param moduleName
      * @param password
      * @param version
      */
     private SecuredTray(Context local_context,
                         final AesCbcWithIntegrity.SecretKeys secretKey,
-                        final TrayModulePreferences allTrayModulePreferences,
+                        final TrayPreferences allTrayPreferences,
                         final String moduleName,
                         final String password,
                         final int version) {
@@ -272,12 +270,12 @@ public class SecuredTray {
 
         listeners = new ArrayList<ISecuredTrayListener>();
 
-        if (allTrayModulePreferences != null) {
-            this.trayModulePreferences = allTrayModulePreferences;
+        if (allTrayPreferences != null) {
+            this.trayPreferences = allTrayPreferences;
         } else if (moduleName != null) {
-            this.trayModulePreferences = new DefaultModulePreference(context, moduleName, version);
+            this.trayPreferences = new DefaultModulePreference(context, moduleName, version);
         } else {
-            this.trayModulePreferences = new DefaultModulePreference(context, version);
+            this.trayPreferences = new DefaultModulePreference(context, version);
         }
 
         if (secretKey != null) {
@@ -285,10 +283,10 @@ public class SecuredTray {
         } else if (password == null || TextUtils.isEmpty(password)) {
             try {
                 String key = generateAesKeyName(context);
-                String keyAsString = this.trayModulePreferences.getString(key, null);
+                String keyAsString = this.trayPreferences.getString(key, null);
                 if (keyAsString == null) {
                     secretKeys = AesCbcWithIntegrity.generateKey();
-                    this.trayModulePreferences.put(key, secretKeys.toString());
+                    this.trayPreferences.put(key, secretKeys.toString());
                 }else{
                     secretKeys = AesCbcWithIntegrity.keys(keyAsString);
                 }
@@ -509,7 +507,7 @@ public class SecuredTray {
      * removeModule
      */
     public void removeModule() {
-        trayModulePreferences.remove(DEFAULT_MODULE_NAME);
+        trayPreferences.remove(DEFAULT_MODULE_NAME);
     }
 
     /**
@@ -517,14 +515,14 @@ public class SecuredTray {
      * @param moduleName
      */
     public void removeModule(String moduleName) {
-        trayModulePreferences.remove(moduleName);
+        trayPreferences.remove(moduleName);
     }
 
     /**
      * clear
      */
     public void clear() {
-        trayModulePreferences.clear();
+        trayPreferences.clear();
     }
 
     /**
@@ -532,15 +530,7 @@ public class SecuredTray {
      * @param migration
      */
     public void migrate(Migration<TrayItem> migration) {
-        trayModulePreferences.migrate(migration);
-    }
-
-    /**
-     * getStorage
-     * @return
-     */
-    public PreferenceStorage<TrayItem> getStorage() {
-        return trayModulePreferences.getStorage();
+        trayPreferences.migrate(migration);
     }
 
     /**
@@ -549,15 +539,7 @@ public class SecuredTray {
      * @return
      */
     public TrayItem getPref(String name) {
-        return trayModulePreferences.getPref(name);
-    }
-
-    /**
-     * getModularizedStorage
-     * @return
-     */
-    public ModularizedStorage<TrayItem> getModularizedStorage() {
-        return trayModulePreferences.getModularizedStorage();
+        return trayPreferences.getPref(name);
     }
 
     /**
@@ -565,7 +547,7 @@ public class SecuredTray {
      * @return
      */
     public Collection<TrayItem> getAll() {
-        return trayModulePreferences.getAll();
+        return trayPreferences.getAll();
     }
 
     /**
@@ -589,19 +571,11 @@ public class SecuredTray {
     }
 
     /**
-     * getModule
-     * @return
-     */
-    public TrayModulePreferences getModule() {
-        return trayModulePreferences;
-    }
-
-    /**
      * setModule
-     * @param trayModulePreferences
+     * @param trayPreferences
      */
-    public void setModule(TrayModulePreferences trayModulePreferences) {
-        this.trayModulePreferences = trayModulePreferences;
+    public void setModule(TrayPreferences trayPreferences) {
+        this.trayPreferences = trayPreferences;
     }
 
     /**
@@ -621,7 +595,7 @@ public class SecuredTray {
      * @return
      */
     public boolean getBoolean(String key, boolean value) {
-        final String encryptedValue = trayModulePreferences.getString(hashPrefKey(key), null);
+        final String encryptedValue = trayPreferences.getString(hashPrefKey(key), null);
         if (encryptedValue == null) {
             return value;
         }
@@ -638,7 +612,7 @@ public class SecuredTray {
      * @param value
      */
     public void setBoolean(String key, boolean value) {
-        trayModulePreferences.put(hashPrefKey(key), encrypt(Boolean.toString(value)));
+        trayPreferences.put(hashPrefKey(key), encrypt(Boolean.toString(value)));
     }
 
     /**
@@ -656,7 +630,7 @@ public class SecuredTray {
      * @return
      */
     public String getString(String key, String value) {
-        final String encryptedValue = trayModulePreferences.getString(hashPrefKey(key), null);
+        final String encryptedValue = trayPreferences.getString(hashPrefKey(key), null);
         return (encryptedValue != null) ? decrypt(encryptedValue) : value;
     }
 
@@ -666,7 +640,7 @@ public class SecuredTray {
      * @param value
      */
     public void setString(String key, String value) {
-        trayModulePreferences.put(hashPrefKey(key), encrypt(value));
+        trayPreferences.put(hashPrefKey(key), encrypt(value));
     }
 
     /**
@@ -686,7 +660,7 @@ public class SecuredTray {
      * @return
      */
     public int getInt(String key, int value) {
-        final String encryptedValue = trayModulePreferences.getString(hashPrefKey(key), null);
+        final String encryptedValue = trayPreferences.getString(hashPrefKey(key), null);
         if (encryptedValue == null) {
             return value;
         }
@@ -703,7 +677,7 @@ public class SecuredTray {
      * @param value
      */
     public void setInt(String key, int value) {
-        trayModulePreferences.put(hashPrefKey(key), encrypt(Integer.toString(value)));
+        trayPreferences.put(hashPrefKey(key), encrypt(Integer.toString(value)));
     }
 
     /**
@@ -723,7 +697,7 @@ public class SecuredTray {
      * @return
      */
     public long getLong(String key, long value) {
-        final String encryptedValue = trayModulePreferences.getString(hashPrefKey(key), null);
+        final String encryptedValue = trayPreferences.getString(hashPrefKey(key), null);
         if (encryptedValue == null) {
             return value;
         }
@@ -740,7 +714,7 @@ public class SecuredTray {
      * @param value
      */
     public void setLong(String key, long value) {
-        trayModulePreferences.put(hashPrefKey(key), encrypt(Long.toString(value)));
+        trayPreferences.put(hashPrefKey(key), encrypt(Long.toString(value)));
     }
 
     /**
@@ -760,7 +734,7 @@ public class SecuredTray {
      * @return
      */
     public float getFloat(String key, float value) {
-        final String encryptedValue = trayModulePreferences.getString(hashPrefKey(key), null);
+        final String encryptedValue = trayPreferences.getString(hashPrefKey(key), null);
         if (encryptedValue == null) {
             return value;
         }
@@ -777,7 +751,7 @@ public class SecuredTray {
      * @param value
      */
     public void setFloat(String key, float value) {
-        trayModulePreferences.put(hashPrefKey(key), encrypt(Float.toString(value)));
+        trayPreferences.put(hashPrefKey(key), encrypt(Float.toString(value)));
     }
 
     /**
@@ -797,7 +771,7 @@ public class SecuredTray {
      * @return
      */
     public double getDouble(String key, double value) {
-        final String encryptedValue = trayModulePreferences.getString(hashPrefKey(key), null);
+        final String encryptedValue = trayPreferences.getString(hashPrefKey(key), null);
         if (encryptedValue == null) {
             return value;
         }
@@ -814,7 +788,7 @@ public class SecuredTray {
      * @param value
      */
     public void setDouble(String key, double value) {
-        trayModulePreferences.put(hashPrefKey(key), encrypt(Double.toString(value)));
+        trayPreferences.put(hashPrefKey(key), encrypt(Double.toString(value)));
     }
 
     /**
@@ -834,7 +808,7 @@ public class SecuredTray {
      * @return
      */
     public BigInteger getDouble(String key, BigInteger value) {
-        final String encryptedValue = trayModulePreferences.getString(hashPrefKey(key), null);
+        final String encryptedValue = trayPreferences.getString(hashPrefKey(key), null);
         if (encryptedValue == null) {
             return value;
         }
@@ -851,14 +825,14 @@ public class SecuredTray {
      * @param value
      */
     public void setBigInteger(String key, BigInteger value) {
-        trayModulePreferences.put(hashPrefKey(key), encrypt(String.valueOf(value)));
+        trayPreferences.put(hashPrefKey(key), encrypt(String.valueOf(value)));
     }
 
     // ===========================================================
     // Private Class
     // ===========================================================
 
-    private class DefaultModulePreference extends TrayModulePreferences {
+    private class DefaultModulePreference extends TrayPreferences {
 
         /**
          * DefaultModulePreference constructor

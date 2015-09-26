@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.draekko.library;
+package com.draekko.securedtray;
 
 // ===========================================================
 // Interface

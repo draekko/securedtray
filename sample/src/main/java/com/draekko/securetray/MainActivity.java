@@ -8,10 +8,10 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.draekko.library.ISecuredTrayListener;
-import com.draekko.library.SecuredTray;
+import com.draekko.securedtray.ISecuredTrayListener;
+import com.draekko.securedtray.SecuredTray;
 
-import net.grandcentrix.tray.TrayModulePreferences;
+import net.grandcentrix.tray.TrayPreferences;
 
 public class MainActivity extends AppCompatActivity
     implements ISecuredTrayListener {
@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity
         securedTrayDefaultPw.setString(CUSTOM_PASSWORD_KEY, CUSTOM_PASSWORD_TEXT);
         String text2 = securedTrayDefaultPw.getString(CUSTOM_PASSWORD_KEY, "empty");
 
-        TrayModulePreferences customTrayModulePreferences =
-                new TrayModulePreferences(this, CUSTOM_TRAY_NAME, CUSTOM_TRAY_VERSION) {
+        TrayPreferences customTrayPreferences =
+                new TrayPreferences(this, CUSTOM_TRAY_NAME, CUSTOM_TRAY_VERSION) {
             @Override
             protected void onCreate(int i) {
                 // do your magic here
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity
                 Log.i(TAG, "DOWNGRADE VERSION:" + i1);
             }
         };
-        SecuredTray customSecuredTrayPw = new SecuredTray(this, customTrayModulePreferences, CUSTOM_PASSWORD);
+        SecuredTray customSecuredTrayPw = new SecuredTray(this, customTrayPreferences, CUSTOM_PASSWORD);
         customSecuredTrayPw.setString(CUSTOM_TRAY_KEY, CUSTOM_TRAY_TEXT);
         String text3 = customSecuredTrayPw.getString(CUSTOM_TRAY_KEY, "empty");
 
